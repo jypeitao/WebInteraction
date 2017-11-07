@@ -31,6 +31,7 @@ driver.get('https://jira.backdoro.com/browse/%s' % BUG_ID)
 comment = driver.find_element_by_id('comment-issue')
 comment.click()
 # issue-comment-add-submit
+comment = driver.find_element_by_xpath("//textarea[@name='comment']")
 
 # go quit
 time.sleep(10)
