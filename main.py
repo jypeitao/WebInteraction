@@ -5,10 +5,11 @@ from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import time
 import datetime
+from userinfo import UserInfo
 
-URL = 'https://jira.backdoro.com/'
-NAME = 'tao.pei@ck-telecom.com'
-PWD = 'ckt123456'
+URL = UserInfo.URL
+NAME = UserInfo.NAME
+PWD = UserInfo.PWD
 
 HEADLESS = 1
 if HEADLESS == 1:
