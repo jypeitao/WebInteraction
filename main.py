@@ -85,27 +85,30 @@ def is_login_jira(driver):
 
 def browse(driver, bug_id):
     if debug:
-        print("browse %s at " % bug_id , datetime.datetime.now())
+        print("browse %s at " % bug_id, datetime.datetime.now())
     driver.get('https://jira.backdoro.com/browse/%s' % bug_id)
     try:
         WebDriverWait(driver, 60, 0.5).until(ec.presence_of_element_located((By.XPATH, '//*[@id="summary-val"]')))
+        sm = driver.find_element_by_xpath('//*[@id="summary-val"]')
         if debug:
             print("XPATH %s OK " % bug_id, datetime.datetime.now())
             sm = driver.find_element_by_xpath('//*[@id="summary-val"]')
             print(sm.text)
     finally:
-        pass
+        return sm.text
 
 
 def get_title(bid):
     dr = create_driver()
     login_jira(dr)
-    browse(dr, bid)
-    print(dr.title)
+    tl = browse(dr, bid)
+    dr.quit()
+    return tl
 
 if __name__ == '__main__':
     p = datetime.datetime.now()
-    get_title('BTTF-927')
+    title = get_title('BTTF-927')
+    print(title)
 #    dr = create_driver()
 #    login_jira(dr)
 #    browse(dr, 'MOTU-2154')
