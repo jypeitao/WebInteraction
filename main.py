@@ -2,77 +2,116 @@
 # -*- coding:utf-8 -*-
 
 from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-import time
 import datetime
 from userinfo import UserInfo
 
 URL = UserInfo.URL
 NAME = UserInfo.NAME
 PWD = UserInfo.PWD
+debug = False
 
-HEADLESS = 1
-if HEADLESS == 1:
-    dcap = dict(DesiredCapabilities.PHANTOMJS)
-    dcap["phantomjs.page.settings.userAgent"] = (
-        "Mozilla/5.0 \
-        (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36")
-    driver = webdriver.PhantomJS( \
-        executable_path='C:\\Users\\admin\\Desktop\\phantomjs-2.1.1-windows\\phantomjs-2.1.1-windows\\bin\\phantomjs',
-        desired_capabilities=dcap)
-else:
-    options = webdriver.ChromeOptions()
-    options.add_argument(
-        'user-agent="Mozilla/5.0 \
-        (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"')
-    prefs = {
-        'profile.default_content_setting_values': {
-            'images': 2
+
+def create_driver():
+    HEADLESS = 1
+    if HEADLESS == 1:
+        dcap = dict(DesiredCapabilities.PHANTOMJS)
+        dcap["phantomjs.page.settings.userAgent"] = (
+            "Mozilla/5.0 \
+            (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36")
+        service_args = []
+        service_args.append('--load-images=no')
+        service_args.append('--disk-cache=yes')
+        service_args.append('--ignore-ssl-errors=true')
+
+        driver = webdriver.PhantomJS( \
+            executable_path='C:\\Users\\admin\\Desktop\\phantomjs-2.1.1-windows\\phantomjs-2.1.1-windows\\bin\\phantomjs',
+            desired_capabilities=dcap, service_args=service_args)
+    else:
+        options = webdriver.ChromeOptions()
+        options.add_argument(
+            'user-agent="Mozilla/5.0 \
+            (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"')
+        prefs = {
+            'profile.default_content_setting_values': {
+                'images': 2
+            }
         }
-    }
-    options.add_experimental_option('prefs', prefs)
-    driver = webdriver.Chrome(chrome_options=options)
-# driver = webdriver.Chrome()
-# driver = webdriver.Chrome("/Users/peter/selenium_webdriver/chromedriver")
-driver.get(URL)
+        options.add_argument('headless')
+        options.add_experimental_option('prefs', prefs)
+        driver = webdriver.Chrome(chrome_options=options)
+    return driver
 
-print(datetime.datetime.now())
-# driver.implicitly_wait(100)
-userName = driver.find_element_by_id('login-form-username')
-userName.clear()
-userName.send_keys(NAME)
 
-passWord = driver.find_element_by_id('login-form-password')
-passWord.clear()
-passWord.send_keys(PWD)
+def login_jira(driver):
+    if debug:
+        print("login ", datetime.datetime.now())
+    driver.get(URL)
+    try:
+        user_name = WebDriverWait(driver, 20).until(
+            ec.presence_of_element_located((By.ID, "login-form-username"))
+        )
+        user_name.clear()
+        user_name.send_keys(NAME)
+    finally:
+        pass
 
-submit = driver.find_element_by_id('login')
-submit.click()
+    pass_word = driver.find_element_by_id('login-form-password')
+    pass_word.clear()
+    pass_word.send_keys(PWD)
 
-# Login in
-BUG_ID = 'BTTF-405'
+    submit = driver.find_element_by_id('login')
+    submit.click()
+    if debug:
+        print("login submit ", datetime.datetime.now())
+    try:
+        WebDriverWait(driver, 20, 0.5).until(is_login_jira)
+        if debug:
+            print("Login succeed", datetime.datetime.now())
+    finally:
+        pass
 
-print("login...")
-time.sleep(10)
-print("already login")
-driver.get('https://jira.backdoro.com/browse/%s' % BUG_ID)
 
-print("show bug")
-comment = driver.find_element_by_id('comment-issue')
-comment.click()
-print("comment click")
-print(datetime.datetime.now())
-# issue-comment-add-submit
-comment = driver.find_element_by_xpath("//textarea[@name='comment']")
-comment.clear()
-comment.send_keys("this is a test")
-print(datetime.datetime.now())
-print("this is a test")
-driver.find_element_by_id('issue-comment-add-submit').click()
-print("this is a test2")
+def is_login_jira(driver):
+    cook = driver.get_cookie("atlassian.xsrf.token")
+    if (cook is not None) and (cook['value'].endswith("|lin")):
+        return True
+    else:
+        return False
 
-print(datetime.datetime.now())
-# go quit
-time.sleep(30)
-# driver.close()
-driver.quit()
+
+def browse(driver, bug_id):
+    if debug:
+        print("browse %s at " % bug_id , datetime.datetime.now())
+    driver.get('https://jira.backdoro.com/browse/%s' % bug_id)
+    try:
+        WebDriverWait(driver, 60, 0.5).until(ec.presence_of_element_located((By.XPATH, '//*[@id="summary-val"]')))
+        if debug:
+            print("XPATH %s OK " % bug_id, datetime.datetime.now())
+            sm = driver.find_element_by_xpath('//*[@id="summary-val"]')
+            print(sm.text)
+    finally:
+        pass
+
+
+def get_title(bid):
+    dr = create_driver()
+    login_jira(dr)
+    browse(dr, bid)
+    print(dr.title)
+
+if __name__ == '__main__':
+    p = datetime.datetime.now()
+    get_title('BTTF-927')
+#    dr = create_driver()
+#    login_jira(dr)
+#    browse(dr, 'MOTU-2154')
+#    print(dr.title)
+    print(datetime.datetime.now() - p)
+#    dr.quit()
+
+
+
