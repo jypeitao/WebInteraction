@@ -8,6 +8,7 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import datetime
 from userinfo import UserInfo
+import time
 
 URL = UserInfo.URL
 NAME = UserInfo.NAME
@@ -83,6 +84,17 @@ def is_login_jira(driver):
         return False
 
 
+def navigation(driver, bug_id):
+    if debug:
+        print("browse %s at " % bug_id, datetime.datetime.now())
+    driver.get('https://jira.backdoro.com/browse/%s' % bug_id)
+    try:
+        WebDriverWait(driver, 60, 0.5).until(ec.presence_of_element_located((By.XPATH, '//*[@id="summary-val"]')))
+    finally:
+        pass
+    return driver
+
+
 def browse(driver, bug_id):
     if debug:
         print("browse %s at " % bug_id, datetime.datetime.now())
@@ -101,19 +113,45 @@ def browse(driver, bug_id):
 def get_title(bid):
     dr = create_driver()
     login_jira(dr)
-    tl = browse(dr, bid)
+    navigation(dr, bid)
+    tl = dr.find_element_by_xpath('//*[@id="summary-val"]').text
     dr.quit()
     return tl
 
+
+def write_commit_info(bid, msg):
+    dr = create_driver()
+    login_jira(dr)
+    navigation(dr, bid)
+    comment = dr.find_element_by_id('comment-issue')
+    comment.click()
+    comment = dr.find_element_by_xpath("//textarea[@name='comment']")
+    comment.clear()
+    comment.send_keys(msg)
+    dr.find_element_by_id('issue-comment-add-submit').click()
+    time.sleep(2)
+    dr.quit()
+
+    return dr
+
+    pass
+
 if __name__ == '__main__':
     p = datetime.datetime.now()
-    title = get_title('BTTF-927')
-    print(title)
+    #title = get_title('BTTF-927')
+    #print(title)
 #    dr = create_driver()
 #    login_jira(dr)
 #    browse(dr, 'MOTU-2154')
 #    print(dr.title)
     print(datetime.datetime.now() - p)
+    p = datetime.datetime.now()
+    print("write")
+    dr = write_commit_info('BTTF-792', "this is test\n ")
+    print(datetime.datetime.now() - p)
+
+
+
 #    dr.quit()
 
 
