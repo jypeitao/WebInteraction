@@ -34,7 +34,7 @@ def create_driver():
         service_args.append('--ignore-ssl-errors=true')
 
         driver = webdriver.PhantomJS(
-            executable_path='/home/peter/bin/phantomjs',
+            executable_path='phantomjs',
             desired_capabilities=dcap, service_args=service_args)
     else:
         options = webdriver.ChromeOptions()
