@@ -7,7 +7,7 @@ import envsetup
 
 if __name__ == '__main__':
     opt = 'update'
-    if len(sys.argv > 1):
+    if len(sys.argv) > 1:
         opt = sys.argv[1].lower()
     if opt == 'install':
         path = envsetup.get_tool_dir()
@@ -19,8 +19,7 @@ if __name__ == '__main__':
     elif opt == 'update':
         path = envsetup.get_tool_dir()
         git_dir = os.path.join(path, '.git')
-        cmd = "git --git-dir = " + git_dir + " --work-tree = " + path + " pull"
-        print(cmd)
+        cmd = "git --git-dir=" + git_dir + " --work-tree=" + path + " pull"
         os.system(cmd)
         pass
     else:
