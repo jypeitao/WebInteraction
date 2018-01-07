@@ -3,6 +3,7 @@
 import os
 import platform
 import shutil
+import stat
 import sys
 
 operation_system = platform.system()
@@ -32,6 +33,13 @@ def download_phantomjs():
     else:
         print("Not support!")
 
+    print('\n++++++++++')
+    print('Installing phantomjs.')
+    print('if downloaded too slowly, you can download it manually.')
+    print('And then unzip to ~/.gitdull')
+    print(url)
+    print('++++++++++\n')
+
     local_path = get_tool_dir()
     file_name = os.path.basename(url)
     local_file = os.path.join(local_path, file_name)
@@ -39,9 +47,11 @@ def download_phantomjs():
     cmd = "wget " + url + " -P " + get_tool_dir()
     os.system(cmd)
 
+    print('Unzipping...')
     shutil.unpack_archive(filename=local_file, extract_dir=local_path)
     phantom_file = os.path.join(os.path.join(local_path, extract_dir), 'bin/phantomjs')
     shutil.copy(src=phantom_file, dst=local_path)
+    os.chmod(os.path.join(local_path, 'phantomjs'), mode=stat.S_IRWXU + stat.S_IRWXG + stat.S_IRWXO)
     shutil.rmtree(os.path.join(local_path, extract_dir))
     os.remove(local_file)
     if not os.path.exists(os.path.join(local_path, 'phantomjs')):
@@ -62,8 +72,16 @@ def install_selenium():
 
 
 def add_to_path():
+    user_home = os.environ['userprofile'] if operation_system == 'Windows' else os.environ['HOME']
+    # ignore windows
+    bash_file = '.bash_profile' if operation_system == 'Darwin' else '.bashrc'
+    shutil.copyfile(os.path.join(user_home, bash_file),
+                    os.path.join(user_home, bash_file + '.dull.bak'))
+    with open(os.path.join(user_home, bash_file), mode='at') as f:
+        f.write('PATH=${PATH}:' + get_tool_dir() + '\n')
+        f.write('export PATH')
 
-    pass
+    print('\nYou can restart your sh to take effect or source ~/' + bash_file)
 
 
 if __name__ == "__main__":
@@ -75,8 +93,23 @@ if __name__ == "__main__":
         print("NOT support")
         sys.exit(110)
 
+    ver = sys.version_info
+    if ver[0] != 3:
+        print("Need Python 3 !!!")
+        sys.exit(109)
+
     install_selenium()
     clone_dulltool()
 
     if not os.path.exists(os.path.join(get_tool_dir(), 'phantomjs')):
         download_phantomjs()
+
+    add_to_path()
+
+    print(
+        'You can see some useful command like gitXXX.\n'
+        'Code will tell you all the details.\n'
+        'You can find them under ~/.gitdull\n'
+        '\n'
+        'Enjoy!!!\n'
+    )
