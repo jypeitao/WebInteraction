@@ -3,6 +3,7 @@
 import argparse
 import os
 import jira_access
+import re
 
 
 def get_commit_msg(title, bugid):
@@ -10,6 +11,7 @@ def get_commit_msg(title, bugid):
            '[id]:' + bugid + '\n'
            '[Products]\n'
            '    DORO 8040\n')
+    msg = re.sub(r"'", "", msg)
     return msg
 
 

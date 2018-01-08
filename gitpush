@@ -20,6 +20,7 @@ if __name__ == '__main__':
 
     if remote_branch == "":
         print("Please let me know which remote branch you want to push")
+        print("gitpush -r YOUR_REMOTE_BRANCH")
         exit(-1)
 
 
