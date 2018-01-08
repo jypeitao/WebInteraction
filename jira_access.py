@@ -183,6 +183,29 @@ def push_to_gerrit():
     return result
 
 
+def push_to_gerrit(remote_branch):
+    br = get_current_branch()
+    print("pushing %s to %s" % br, remote_branch)
+    cmd = "git push origin " + br + ":refs/for/" + remote_branch + "/" + br
+    sp = subprocess.Popen(cmd,
+                          shell=True,
+                          stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE,
+                          bufsize=-1)
+
+    result = sp.communicate()
+    stdo = result[0].decode('utf-8')
+    stde = result[1].decode('utf-8')
+    result = stdo + stde
+
+    mt = re.search(r"remote: +(http://\S*) ", result)
+    if mt is not None:
+        result = mt.group(1)
+    else:
+        raise Exception('push fail')
+    return result
+
+
 if __name__ == '__main__':
     p = datetime.datetime.now()
     st = push_to_gerrit()
