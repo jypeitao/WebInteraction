@@ -18,7 +18,6 @@ if __name__ == '__main__':
 
     remote_branch = FLAGS.remote_branch
 
-    print(remote_branch)
     if remote_branch == "":
         print("Please let me know which remote branch you want to push")
         exit(-1)

@@ -185,7 +185,7 @@ def push_to_gerrit():
 
 def push_to_gerrit(remote_branch):
     br = get_current_branch()
-    print("pushing %s to %s" % br, remote_branch)
+    print("pushing %s to %s" % (br, remote_branch))
     cmd = "git push origin " + br + ":refs/for/" + remote_branch + "/" + br
     sp = subprocess.Popen(cmd,
                           shell=True,
