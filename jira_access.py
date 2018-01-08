@@ -144,11 +144,28 @@ def write_commit_info(bid, msg):
     dr = create_driver()
     login_jira(dr)
     navigation(dr, bid)
+    try:
+        WebDriverWait(dr, 60, 0.5).until(ec.presence_of_element_located((By.ID, 'comment-issue')))
+    except TimeoutException:
+        dr.quit()
+        raise TimeoutException('Can not find element comment-issue')
     comment = dr.find_element_by_id('comment-issue')
     comment.click()
+
+    try:
+        WebDriverWait(dr, 60, 0.5).until(ec.presence_of_element_located((By.XPATH, "//textarea[@name='comment']")))
+    except TimeoutException:
+        dr.quit()
+        raise TimeoutException('Can not find element textarea of comment')
     comment = dr.find_element_by_xpath("//textarea[@name='comment']")
     comment.clear()
     comment.send_keys(msg)
+
+    try:
+        WebDriverWait(dr, 60, 0.5).until(ec.presence_of_element_located((By.ID, "issue-comment-add-submit")))
+    except TimeoutException:
+        dr.quit()
+        raise TimeoutException('Can not find element issue-comment-add-submit')
     dr.find_element_by_id('issue-comment-add-submit').click()
     time.sleep(2)
     dr.quit()
