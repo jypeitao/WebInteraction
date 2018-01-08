@@ -13,6 +13,7 @@ import os
 import subprocess
 import re
 import jira_config
+
 debug = False
 
 NAME = jira_config.NAME
@@ -20,6 +21,14 @@ PWD = jira_config.PWD
 
 URL = 'https://jira.backdoro.com/secure/Dashboard.jspa'
 BROWSE_URL = 'https://jira.backdoro.com/browse/'
+
+
+def is_configured_properly():
+    if NAME == 'your name' or NAME == '':
+        return False
+    else:
+        return True
+
 
 def create_driver():
     use_phantomjs = 1
@@ -55,6 +64,11 @@ def create_driver():
 def login_jira(driver):
     if debug:
         print("login ", datetime.datetime.now())
+    if not is_configured_properly:
+        driver.quit()
+        print("Please set your name and password before access jira. ~/.gitdull/jira_config.py")
+        exit(-1)
+
     driver.get(URL)
     try:
         user_name = WebDriverWait(driver, 20).until(
@@ -94,7 +108,7 @@ def navigation(driver, bug_id):
         print("browse %s at " % bug_id, datetime.datetime.now())
     burl = BROWSE_URL + bug_id
     driver.get(burl)
-    #driver.get('https://jira.backdoro.com/browse/%s' % bug_id)
+    # driver.get('https://jira.backdoro.com/browse/%s' % bug_id)
     try:
         WebDriverWait(driver, 60, 0.5).until(ec.presence_of_element_located((By.XPATH, '//*[@id="summary-val"]')))
     except TimeoutException:

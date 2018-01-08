@@ -110,6 +110,7 @@ if __name__ == "__main__":
         'You can see some useful command like gitXXX.\n'
         'Code will tell you all the details.\n'
         'You can find them under ~/.gitdull\n'
+        'Befor use it, please set your name and password to access jira in file ~/.gitdull/jira_config.py\n'
         '\n'
         'Enjoy!!!\n'
     )
