@@ -145,7 +145,7 @@ def write_commit_info(bid, msg):
     login_jira(dr)
     navigation(dr, bid)
     try:
-        WebDriverWait(dr, 60, 0.5).until(ec.presence_of_element_located((By.ID, 'comment-issue')))
+        WebDriverWait(dr, 60, 0.5).until(ec.element_to_be_clickable((By.ID, 'comment-issue')))
     except TimeoutException:
         dr.quit()
         raise TimeoutException('Can not find element comment-issue')
