@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
+import os
+import sys
+
+import envsetup
+
+if __name__ == '__main__':
+    opt = 'update'
+    if len(sys.argv) > 1:
+        opt = sys.argv[1].lower()
+    if opt == 'install':
+        path = envsetup.get_tool_dir()
+        if not os.listdir(path):
+            envsetup.main()
+        else:
+            print("Already installed. gitdull update or rm -rf ~/.gitdull")
+
+    elif opt == 'update':
+        path = envsetup.get_tool_dir()
+        git_dir = os.path.join(path, '.git')
+        cmd = "git --git-dir=" + git_dir + " --work-tree=" + path + " pull"
+        os.system(cmd)
+        pass
+    else:
+        print('''Usage: gitdull install or gitdull update''')
+        exit(-1)
